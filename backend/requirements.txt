@@ -1,1 +1,4 @@
 instaloader
+google-genai
+python-dotenv
+pydantic
