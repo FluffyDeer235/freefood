@@ -1,4 +1,5 @@
-instaloader
 google-genai
 python-dotenv
 pydantic
+apscheduler
+beautifulsoup4
