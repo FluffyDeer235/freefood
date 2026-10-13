@@ -3,3 +3,5 @@ python-dotenv
 pydantic
 apscheduler
 beautifulsoup4
+"psycopg[binary]"
+tenacity
