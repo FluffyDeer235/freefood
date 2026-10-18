@@ -3,5 +3,6 @@ python-dotenv
 pydantic
 apscheduler
 beautifulsoup4
-"psycopg[binary]"
+psycopg[binary]
 tenacity
+discord.py

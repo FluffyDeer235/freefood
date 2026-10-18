@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import time
-from util import *
+from backend.util import *
 
 HEADERS: dict = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36 OPR/135.0.0.0 (Edition std-2)",
@@ -9,12 +9,14 @@ HEADERS: dict = {
     "Accept": "application/json"
 }
 
+# Get events that have already been processed - saves the chance of having to go through gemini again
 SEEN_EVENTS: set[int] = get_seen_events()
 
 def scrap():
-
+    # Remove events that have already happened
     prune_events()
 
+    # Getting the events json directly from activate's api
     request = requests.get(activate_api(1), headers=HEADERS)
 
     if request.status_code == 200:
@@ -73,6 +75,7 @@ def scan_page(events: list[dict]):
             )
             continue
 
+        # Events that passed the initial check are passed to gemini to make final decision on whether there's food
         results = get_response(info_string)
         update_database(
             event_id,
@@ -84,6 +87,7 @@ def scan_page(events: list[dict]):
             get_datetime(start_date, start_time)
         )
 
+    # Adding interval between each request to prevent timeout
     time.sleep(2)
 
        

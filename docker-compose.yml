@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: free_food_uts_riel
+    restart: unless-stopped
+    environment: 
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-events_db}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db_init/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+  
+  scrapper:
+    build: .
+    container_name: freefood_scrapper
+    restart: unless-stopped
+    command: python -m backend.main
+    env_file:
+      - .env
+    depends_on:
+      - db
+  
+  discord_bot:
+    build: .
+    container_name: freefood_bot
+    restart: unless-stopped
+    command: python -m frontend.bot
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

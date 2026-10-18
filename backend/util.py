@@ -1,7 +1,12 @@
 from google import genai
 from dotenv import load_dotenv
-from schema import AnalysisResult
 import os
+import sys
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(project_root)
+
+from backend.schema import AnalysisResult
 import re
 import psycopg
 from datetime import datetime
@@ -25,9 +30,10 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 INSTRUCTIONS = "You are an AI that analyzes university societies' event post captions. Determine if the post is advertising an event that has free food. Only flag it if food is explicitly mentioned as free or included"
 
-# 
+# URL that connects program to database
 CONNECTION_URL = os.getenv("CONNECTION_URL")
 
+# Gets response from Gemini
 @retry(wait=wait_exponential(multiplier=2, min=2, max=20), stop=stop_after_attempt(5))
 def get_response(caption: str) -> dict:
     response = client.interactions.create(
@@ -88,7 +94,7 @@ def get_food_events() -> list[dict]:
         with psycopg.connect(CONNECTION_URL) as conn:
             with conn.cursor() as cur:
                 query = """
-                    SELECT title, link, start_datetime, end_datetime 
+                    SELECT title, link, start_datetime, end_datetime, is_free 
                     FROM events 
                     WHERE has_food = TRUE 
                     AND end_datetime >= %s
@@ -101,7 +107,8 @@ def get_food_events() -> list[dict]:
                     "title": row[0],
                     "link": row[1],
                     "start_datetime": row[2],
-                    "end_datetime": row[3]
+                    "end_datetime": row[3],
+                    "is_free": row[4]
                 } for row in cur.fetchall()]
     except Exception as e:
         print(f"Error in getting events with food: {str(e)}")
