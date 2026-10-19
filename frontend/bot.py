@@ -10,6 +10,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from backend.util import get_food_events
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 load_dotenv()
 token = os.getenv("BOT_TOKEN")
@@ -44,8 +45,8 @@ async def free_food(ctx):
         end_datetime: datetime = event["end_datetime"]
         is_free: bool = event["is_free"]
 
-        start_str = start_datetime.strftime("%b %d, %I:%M %p")
-        end_str = end_datetime.strftime("%b %d, %I:%M %p")
+        start_str = start_datetime.astimezone(ZoneInfo("Australia/Sydney")).strftime("%b %d, %I:%M %p")
+        end_str = end_datetime.astimezone(ZoneInfo("Australia/Sydney")).strftime("%b %d, %I:%M %p")
         time_display = f"{start_str} - {end_str}"
 
         event_str: str = f"**[{title}]({link})**\n 🎟️ {"Free/Included in Ticket" if is_free else "Not Free"}\n 📆 {time_display} \n \n"
